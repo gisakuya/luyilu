@@ -1,0 +1,71 @@
+﻿@page
+@model IndexModel
+
+@if (string.IsNullOrEmpty(Model.PageHtml))
+{
+    <form id="form">
+        <p>输入网址</p>
+        <p>
+            <input id="url" style="width:100%" name="p" value="" />
+        </p>
+        <p>
+            <input type="submit" value="提交" />
+        </p>
+    </form>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#url").val(window.localStorage.getItem("home-url"))
+        })
+
+        $("#form").submit(function () {
+            let url = $("#url").val()
+            window.localStorage.setItem("home-url", url)
+        })
+    </script>
+}
+else
+{
+    var lastPos = Model.PageHtml.LastIndexOf("</body>");
+    var html = Model.PageHtml.Insert(lastPos, @"
+        <script src='/lib/jquery/dist/jquery.min.js'></script>
+        <script src='/js/gbk.min.js'></script>
+        <script>
+            $(document).ready(function () {
+                const urlParams = new URLSearchParams(window.location.search)
+                const homeUrl = urlParams.get('p')
+
+                $('.next-page a').add('.pagination a').add('.nav a').each(function(){
+                    let _this = $(this)
+                    let url = _this.attr('href')
+                    let newUrl = '/?p=' + new URL(url, homeUrl).href
+                    _this.attr('href', newUrl)
+                    _this.data('isDeal', true)
+                })
+
+                $('form').submit(function(){
+                    let _this = $(this)
+                    let url = _this.attr('action')
+                    url = new URL(url, homeUrl)
+                    _this.find(':text').each(function(){
+                        url.searchParams.append(this.name, this.value)
+                    })
+                    let newUrl = GBK.URI.encodeURI('/?p=' + decodeURI(url.href))
+                    window.open(newUrl)
+                    return false
+                })
+
+                $('a').click(function () {
+                    let _this = $(this)
+                    if(_this.data('isDeal') == true) return
+                    let url = _this.attr('href')
+                    let newUrl = '/img?p=' + new URL(url, homeUrl).href
+                    _this.attr('href', newUrl)
+                    _this.data('isDeal', true)
+                })
+            })
+        </script>
+    ");
+
+    @Html.Raw(html)
+}

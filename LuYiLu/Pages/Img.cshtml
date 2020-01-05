@@ -1,0 +1,26 @@
+﻿@page
+@model ImgModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Title</title>
+    <style>
+        img {
+            max-width: 30%;
+            max-height: 30%;
+        }
+    </style>
+</head>
+<body>
+    @foreach (var src in Model.ImageUrls)
+    {
+        <a href="@src" target="_blank">
+            <img src="@src" />
+        </a>
+    }
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+</body>
+</html>
